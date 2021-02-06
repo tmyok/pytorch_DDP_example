@@ -112,33 +112,35 @@ def training(cfg, world_size, model, dataset_train, dataset_validation):
     criterion = torch.nn.CrossEntropyLoss()
     opt = torch.optim.Adam(model.parameters(), lr=lr)
 
-    for epoch in range(epochs):
-        # In distributed mode, calling the set_epoch() method at the beginning of each epoch
-        # before creating the DataLoader iterator is necessary to make shuffling work properly 
-        # across multiple epochs. Otherwise, the same ordering will be always used.
-        sampler.set_epoch(epoch)
+    try:
+        for epoch in range(epochs):
+            # In distributed mode, calling the set_epoch() method at the beginning of each epoch
+            # before creating the DataLoader iterator is necessary to make shuffling work properly 
+            # across multiple epochs. Otherwise, the same ordering will be always used.
+            sampler.set_epoch(epoch)
 
-        train_one_epoch(
-            model=model,
-            train_loader=train_loader,
-            optimizer=opt,
-            criterion=criterion,
-            rank=rank,
-            world_size=world_size,
-            epoch=epoch,
-            num_epoch=epochs)
+            train_one_epoch(
+                model=model,
+                train_loader=train_loader,
+                optimizer=opt,
+                criterion=criterion,
+                rank=rank,
+                world_size=world_size,
+                epoch=epoch,
+                num_epoch=epochs)
 
-        validation(
-            model=model,
-            data_loader=val_loader,
-            criterion=criterion,
-            rank=rank,
-            world_size=world_size,
-            epoch=epoch,
-            num_epoch=epochs)
-        
+            validation(
+                model=model,
+                data_loader=val_loader,
+                criterion=criterion,
+                rank=rank,
+                world_size=world_size,
+                epoch=epoch,
+                num_epoch=epochs)
 
-    
+    except KeyboardInterrupt:
+        pass
+
     return model
 
 if __name__ == '__main__':
